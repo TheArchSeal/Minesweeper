@@ -30,6 +30,7 @@ Ingame Keybinds:
 Neat features:
 * The terminal will clean away the field after playing
 * You can not open a flagged cell
+* The first cell will always be 0 if possible
 * Opening a 0 will also open its neighbors
 * Opening an open cell of the same number as it's number of neighboring flags will open its non-flagged neighbors
 * Add the folder 'build' to the PATH enviroment variable to call from anywhere using 'mine'

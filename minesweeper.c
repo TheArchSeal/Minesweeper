@@ -603,11 +603,11 @@ int main(int argc, char** argv) {
 	// Print game result
 	switch (game_state) {
 		case WIN:
-			printf("Won a game of minesweeper after %llu seconds", time(NULL) - start_time);
+			printf("Won a game of minesweeper in %llu seconds", time(NULL) - start_time);
 			break;
 
 		case LOSS:
-			printf("Lost a game of minesweeper after %llu seconds", time(NULL) - start_time);
+			printf("Lost a game of minesweeper in %llu seconds", time(NULL) - start_time);
 			break;
 
 		default:
