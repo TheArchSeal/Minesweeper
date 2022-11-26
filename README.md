@@ -32,3 +32,4 @@ Neat features:
 * You can not open a flagged cell
 * Opening a 0 will also open its neighbors
 * Opening an open cell of the same number as it's number of neighboring flags will open its non-flagged neighbors
+* Add the folder 'build' to the PATH enviroment variable to call from anywhere using 'mine'
