@@ -13,9 +13,9 @@ Recognized command line arguments:
 Rightmost argument take priority and percentage is calculated last.
 \
 Default arguments:
-* field width           = 15
+* field width           = 20
 * field height          = 15
-* field mine percentage = 20
+* field mine percentage = 15
 
 Ingame Keybinds:
 * w :      Move cursor up

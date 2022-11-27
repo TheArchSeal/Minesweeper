@@ -437,6 +437,13 @@ void print_cursor(int x, int y) {
 	// else cursor_to_start();
 }
 
+// Overwrites cursor with spaces
+// Does not overwrite anything else
+// Returns cursor to original position
+void unprint_cursor(int x, int y) {
+	print_at(x * 2, y, "   ");
+}
+
 // Reads argc arguments from argv and assins to field accordingly
 // Returns 0 if successful, 1 otherwise
 // Recognized argsuments:
@@ -449,9 +456,9 @@ void print_cursor(int x, int y) {
 int get_args(int argc, char** argv, Field* field) {
 	bool use_percent = true;
 
-	field->w = 15;
+	field->w = 20;
 	field->h = 15;
-	field->mine_count = 20;
+	field->mine_count = 15;
 
 	// Skip path argument
 	for (int i = 1; i < argc; ++i) {
@@ -578,6 +585,7 @@ int main(int argc, char** argv) {
 	// Determining game result
 	switch (game_state) {
 		case WIN:
+			unprint_cursor(cursor_x, cursor_y);
 			print_field(field);
 			print_at((field->w + 1) * 2, 3, "Game Won!");
 			fflush(stdout);
@@ -585,6 +593,7 @@ int main(int argc, char** argv) {
 			break;
 
 		case LOSS:
+			unprint_cursor(cursor_x, cursor_y);
 			open_mines(field);
 			print_field(field);
 			print_at((field->w + 1) * 2, 3, "Game Over!");
