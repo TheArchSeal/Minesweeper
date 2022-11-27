@@ -583,26 +583,19 @@ int main(int argc, char** argv) {
 	} while (game_state == PLAYING && (c = getch()) != KEYBOARD_INTERRUPT); // Get new char and quit at keyboard interrupt (CTRL+c)
 
 	// Determining game result
-	switch (game_state) {
-		case WIN:
-			unprint_cursor(cursor_x, cursor_y);
-			print_field(field);
-			print_at((field->w + 1) * 2, 3, "Game Won!");
-			fflush(stdout);
-			while ((c = getch()) != KEYBOARD_INTERRUPT && c != KEYBOARD_ENTER);
-			break;
-
-		case LOSS:
-			unprint_cursor(cursor_x, cursor_y);
+	time_t end_time = time(NULL);
+	if (game_state != PLAYING) {
+		if (game_state == LOSS)
 			open_mines(field);
-			print_field(field);
-			print_at((field->w + 1) * 2, 3, "Game Over!");
-			fflush(stdout);
-			while ((c = getch()) != KEYBOARD_INTERRUPT && c != KEYBOARD_ENTER);
-			break;
 
-		default:
-			break;
+		// Show final field
+		unprint_cursor(cursor_x, cursor_y);
+		print_field(field);
+		print_at((field->w + 1) * 2, 3, game_state == WIN ? "Game Won!" : "Game Lost!");
+		fflush(stdout);
+
+		// Wait for user to contiue
+		while ((c = getch()) != KEYBOARD_INTERRUPT && c != KEYBOARD_ENTER);
 	}
 
 	// Return terminal to original state
@@ -610,18 +603,8 @@ int main(int argc, char** argv) {
 	clear_n_lines(field->h);
 
 	// Print game result
-	switch (game_state) {
-		case WIN:
-			printf("Won a game of minesweeper in %llu seconds", time(NULL) - start_time);
-			break;
-
-		case LOSS:
-			printf("Lost a game of minesweeper in %llu seconds", time(NULL) - start_time);
-			break;
-
-		default:
-			break;
-	}
+	if (game_state != PLAYING)
+		printf("%s a game of minesweeper in %llu seconds\n", game_state == WIN ? "Won" : "Lost", end_time - start_time);
 
 	show_cursor();
 	fflush(stdout);
