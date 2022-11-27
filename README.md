@@ -9,6 +9,8 @@ Recognized command line arguments:
 * dim=\<n>,\<m> - Sets field width to n and height to m
 * mc=\<n>       - Sets field mine count to n
 * mp=\<n>       - Sets field mine count to n percent of cell count
+* --help        - List all valid commands
+* --keybinds    - List all keybinds
 
 Rightmost argument take priority and percentage is calculated last.
 \
@@ -26,7 +28,7 @@ Ingame Keybinds:
 * Space :  Open cell
 * Enter :  Exit game after playing
 * Ctrl+c : Exit game
-* \<any> : Redraw and update timer
+* \<any> : Update timer and redraw
 
 Neat features:
 * The terminal will clean away the field after playing

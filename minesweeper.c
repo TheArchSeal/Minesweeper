@@ -1,6 +1,3 @@
-// compiler args
-// gcc .\minesweeper.c -o mine.exe -Wall -Wextra -Werror -static -pipe -O2
-
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
@@ -85,6 +82,7 @@ const int COLOR_NUMS[] = {
 };
 
 #define THROW(...) { fprintf(stderr, __VA_ARGS__); return EXIT_FAILURE; }
+#define THROW_VAL(err, ...) { fprintf(stderr, __VA_ARGS__); return err; }
 
 typedef enum {
 	PLAYING,
@@ -149,13 +147,21 @@ bool set_random_cell_to_mine(Field* field) {
 }
 
 // Toggle flag state if not open
-// Returns previous flag state 
-bool flag_cell(Field* field, int x, int y) {
+// Upates flag_count accordingly
+void flag_cell(Field* field, int x, int y, int* flag_count) {
 	Cell* cell = get_cell(field, x, y);
-	bool was_flag = cell->state == FLAGGED;
-	if (cell->state == CLOSED) cell->state = FLAGGED;
-	else if (cell->state == FLAGGED) cell->state = CLOSED;
-	return was_flag;
+	switch (cell->state) {
+		case CLOSED:
+			cell->state = FLAGGED;
+			++* flag_count;
+			break;
+		case FLAGGED:
+			cell->state = CLOSED;
+			--* flag_count;
+			break;
+		default:
+			break;
+	}
 }
 
 // Returns the number of mine neighbors
@@ -463,8 +469,44 @@ int get_args(int argc, char** argv, Field* field) {
 	// Skip path argument
 	for (int i = 1; i < argc; ++i) {
 		char* arg = argv[i];
-		char* eq_pos = strchr(arg, '=');
 
+		if (strcmp(arg, "--help") == 0) {
+			printf(
+				"  w=<n>          Sets field width to n\n"
+				"  h=<n>          Sets field height to n\n"
+				"  dim=<n>        Sets field width and height to n\n"
+				"  dim=<n>,<m>    Sets field width to n and height to m\n"
+				"\n"
+				"  mc=<n>         Sets field mine count to n\n"
+				"  mp=<n>         Sets field mine count to n percent of cell count\n"
+				"\n"
+				"  --help         Display this information\n"
+				"  --keybinds     List all keybinds\n"
+			);
+
+			exit(EXIT_SUCCESS);
+
+		} else if (strcmp(arg, "--keybinds") == 0) {
+			printf(
+				"  w           Move cursor up\n"
+				"  s           Move cursor down\n"
+				"  a           Move cursor left\n"
+				"  d           Move cursor right\n"
+				"\n"
+				"  f           Flag / Unflag cell\n"
+				"  Space       Open cell\n"
+				"  Enter       Exit game after playing\n"
+				"  Ctrl + c    Exit game\n"
+				"\n"
+				"  <any>       Update timer and redraw\n"
+			);
+
+			exit(EXIT_SUCCESS);
+		}
+
+
+
+		char* eq_pos = strchr(arg, '=');
 		if (eq_pos) {
 			*(eq_pos++) = '\0';
 			int val = atoi(eq_pos);
@@ -507,7 +549,8 @@ int main(int argc, char** argv) {
 
 	int err;
 	if ((err = get_args(argc, argv, field))) return err;
-	if ((err = enable_virtual_terminal_sequences())) return err;
+	if ((err = enable_virtual_terminal_sequences()))
+		THROW_VAL(err, "Unable to enable virtual terminal sequences");
 
 	if (resize_field(field)) THROW("Unable to allocate cells\n"); // If unable to malloc, quit
 	clear_field(field);
@@ -559,8 +602,7 @@ int main(int argc, char** argv) {
 
 				break;
 			case KEYBIND_FLAG:
-				if (flag_cell(field, cursor_x, cursor_y)) --flag_count;
-				else ++flag_count;
+				flag_cell(field, cursor_x, cursor_y, &flag_count);
 				break;
 		}
 
@@ -571,7 +613,9 @@ int main(int argc, char** argv) {
 		print_at((field->w + 1) * 2, 0, "Mines left: %i", field->mine_count - flag_count);
 		print_at((field->w + 1) * 2, 1, "Time taken: %llus", time(started ? NULL : &start_time) - start_time);
 		fflush(stdout);
-	} while (game_state == PLAYING && (c = getch()) != KEYBOARD_INTERRUPT); // Get new char and quit at keyboard interrupt (CTRL+c)
+
+		// Get new input and quit at keyboard interrupt (CTRL+c)
+	} while (game_state == PLAYING && (c = getch()) != KEYBOARD_INTERRUPT);
 
 	// Determining game result
 	time_t end_time = time(NULL);
