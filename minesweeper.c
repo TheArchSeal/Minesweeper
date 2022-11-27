@@ -55,6 +55,12 @@ int enable_virtual_terminal_sequences(void) {
 #define KEYBIND_OPEN ' '
 #define KEYBIND_FLAG 'f'
 
+// Default arguments
+#define DEFAULT_WIDTH 20
+#define DEFAULT_HEIGHT 15
+#define DEFAULT_MINE_COUNT 15
+#define DEFAULT_USE_MINE_PERCENTAGE true
+
 // Colors
 #define TO_RGB(hex) (((hex) >> 16) & 255), ((hex) >> 8 & 255), ((hex) >> 0 & 255)
 #define COLOR_CLOSED 0x909090
@@ -153,11 +159,11 @@ void flag_cell(Field* field, int x, int y, int* flag_count) {
 	switch (cell->state) {
 		case CLOSED:
 			cell->state = FLAGGED;
-			++* flag_count;
+			if (flag_count) ++(*flag_count);
 			break;
 		case FLAGGED:
 			cell->state = CLOSED;
-			--* flag_count;
+			if (flag_count) --(*flag_count);
 			break;
 		default:
 			break;
@@ -460,11 +466,11 @@ void unprint_cursor(int x, int y) {
 //     mc=<n>      - Sets field mine count to n
 //     mp=<n>      - Sets field mine count to n percent of cell count
 int get_args(int argc, char** argv, Field* field) {
-	bool use_percent = true;
+	bool use_percent = DEFAULT_USE_MINE_PERCENTAGE;
 
-	field->w = 20;
-	field->h = 15;
-	field->mine_count = 15;
+	field->w = DEFAULT_WIDTH;
+	field->h = DEFAULT_HEIGHT;
+	field->mine_count = DEFAULT_MINE_COUNT;
 
 	// Skip path argument
 	for (int i = 1; i < argc; ++i) {
@@ -550,7 +556,7 @@ int main(int argc, char** argv) {
 	int err;
 	if ((err = get_args(argc, argv, field))) return err;
 	if ((err = enable_virtual_terminal_sequences()))
-		THROW_VAL(err, "Unable to enable virtual terminal sequences");
+		THROW_VAL(err, "Unable to enable virtual terminal sequences\n");
 
 	if (resize_field(field)) THROW("Unable to allocate cells\n"); // If unable to malloc, quit
 	clear_field(field);
@@ -565,7 +571,7 @@ int main(int argc, char** argv) {
 	// Allows buffer_size chars to be printed at once
 	size_t buffer_size = max(BUFSIZ, (field->w * field->h + 8) * 32);
 	char* buffer = malloc(buffer_size);
-	if (buffer == NULL) THROW("Unable to allocate print buffer"); // If unable to malloc, quit
+	if (buffer == NULL) THROW("Unable to allocate print buffer\n"); // If unable to malloc, quit
 	setvbuf(stdout, buffer, _IOFBF, buffer_size);
 
 	hide_cursor();
@@ -644,9 +650,9 @@ int main(int argc, char** argv) {
 	show_cursor();
 	fflush(stdout);
 
-	// Clears up memory
+	// Clear up memory
 	free(buffer);
 	delete_field(field);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
