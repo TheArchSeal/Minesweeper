@@ -26,6 +26,7 @@ Ingame Keybinds:
 * Space :  Open cell
 * Enter :  Exit game after playing
 * Ctrl+c : Exit game
+* \<any> : Redraw and update timer
 
 Neat features:
 * The terminal will clean away the field after playing

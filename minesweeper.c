@@ -535,19 +535,15 @@ int main(int argc, char** argv) {
 		switch (c) {
 			case KEYBIND_UP:
 				if (cursor_y > 0) cursor_y--;
-				else continue;
 				break;
 			case KEYBIND_DOWN:
 				if (cursor_y < field->h - 1) ++cursor_y;
-				else continue;
 				break;
 			case KEYBIND_LEFT:
 				if (cursor_x > 0) cursor_x--;
-				else continue;
 				break;
 			case KEYBIND_RIGHT:
 				if (cursor_x < field->w - 1) ++cursor_x;
-				else continue;
 				break;
 
 			case KEYBIND_OPEN:
@@ -566,11 +562,6 @@ int main(int argc, char** argv) {
 				if (flag_cell(field, cursor_x, cursor_y)) --flag_count;
 				else ++flag_count;
 				break;
-
-			case '\0':
-				break;
-			default:
-				continue;
 		}
 
 		// Print game-state
