@@ -12,8 +12,8 @@ Recognized command line arguments:
 * --help        - List all valid commands
 * --keybinds    - List all keybinds
 
-Rightmost argument take priority and percentage is calculated last.
-\
+Rightmost argument (except for --help and --keybinds) takes priority and percentage is calculated last.
+
 Default arguments:
 * field width           = 20
 * field height          = 15
@@ -31,9 +31,9 @@ Ingame Keybinds:
 * \<any> : Update timer and redraw
 
 Neat features:
-* The terminal will clean away the field after playing
-* You can not open a flagged cell
+* The terminal will clear away the field after playing
+* You can't open a flagged cell
 * The first cell will always be 0 if possible
 * Opening a 0 will also open its neighbors
-* Opening an open cell of the same number as it's number of neighboring flags will open its non-flagged neighbors
-* Add the folder 'build' to the PATH enviroment variable to call from anywhere using 'mine'
+* Opening an open cell of the same number as it's number of neighboring flags will open all its non-flagged neighbors
+* Add the folder 'build' to the PATH environment variable to call from anywhere using 'mine'

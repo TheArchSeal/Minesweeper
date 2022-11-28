@@ -25,10 +25,10 @@ void clear_n_lines(int n) { printf(ESC"[%iM", n); } // Clear n lines below curso
 void set_default_colors(void) { printf(ESC"[0m"); }
 void set_foreground_color(int r, int g, int b) { printf(ESC"[38;2;%i;%i;%im", r, g, b); }
 void set_background_color(int r, int g, int b) { printf(ESC"[48;2;%i;%i;%im", r, g, b); }
-// Print the same C string n times
+// Print the same C-string n times
 void print_n_times(const char* cstr, int n) { for (int i = 0; i < n; ++i) printf("%s", cstr); }
 
-// Return any error that might occur
+// Returns any error that might occur
 int enable_virtual_terminal_sequences(void) {
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hOut == INVALID_HANDLE_VALUE)
@@ -114,7 +114,7 @@ typedef struct {
 } Field;
 
 // Sets mine_count to percentage of size rounded down
-// Percentage is forced withing [0, 100]
+// Percentage is clamped withing [0, 100]
 void set_mine_count_percent(Field* field, int percent) {
 	if (percent < 0) percent = 0;
 	else if (percent > 100) percent = 100;
@@ -153,7 +153,7 @@ bool set_random_cell_to_mine(Field* field) {
 }
 
 // Toggle flag state if not open
-// Upates flag_count accordingly
+// If given, updates flag_count accordingly
 void flag_cell(Field* field, int x, int y, int* flag_count) {
 	Cell* cell = get_cell(field, x, y);
 	switch (cell->state) {
@@ -170,8 +170,8 @@ void flag_cell(Field* field, int x, int y, int* flag_count) {
 	}
 }
 
-// Returns the number of mine neighbors
-// Outside bounds are not mines
+// Returns the number of neighboring mines
+// Outside bounds are not counted as mines
 int mine_neighbor_count(Field* field, int x, int y) {
 	int count = 0;
 	for (int dy = -1; dy <= 1; ++dy)
@@ -183,8 +183,8 @@ int mine_neighbor_count(Field* field, int x, int y) {
 	return count;
 }
 
-// Returns the number of flagged neighbors
-// Outside bounds are not flagged
+// Returns the number of neighboring flags
+// Outside bounds are not counted as flagged
 int flagged_neighbor_count(Field* field, int x, int y) {
 	int count = 0;
 	for (int dy = -1; dy <= 1; ++dy)
@@ -198,13 +198,13 @@ int flagged_neighbor_count(Field* field, int x, int y) {
 
 // Set closed cell to open
 // If zero, open neighbors automatically
-// Returns true if player hit a mine, false othewrise
+// Returns true if player hit a mine, false otherwise
 bool open_closed_cell(Field*, int, int);
 
 // Set closed cell to open
 // If zero, open neighbors automatically
-// If open and enough neighboors are flagged, open the other neighbors automatically
-// Returns true if player hit a mine, false othewrise
+// If open and enough neighbors are flagged, open the other neighbors automatically
+// Returns wether player hit a mine
 bool open_cell(Field* field, int x, int y) {
 	Cell* cell = get_cell(field, x, y);
 	if (cell->state == FLAGGED) return false;
@@ -214,13 +214,13 @@ bool open_cell(Field* field, int x, int y) {
 	cell->state = OPEN;
 
 	bool hit_mine = false;
-	if (open_neighbors)
+	if (open_neighbors) // Recursively open neighboring cells
 		for (int dy = -1; dy <= 1; ++dy)
 			for (int dx = -1; dx <= 1; ++dx)
 				hit_mine |= (dx != 0 || dy != 0) && in_field(field, x + dx, y + dy)
 				&& open_closed_cell(field, x + dx, y + dy);
 
-	if (hit_mine)
+	if (hit_mine) // Open cells regardless
 		for (int dy = -1; dy <= 1; ++dy)
 			for (int dx = -1; dx <= 1; ++dx)
 				get_cell(field, x + dx, y + dy)->state = OPEN;
@@ -234,7 +234,7 @@ bool open_closed_cell(Field* field, int x, int y) {
 	return false;
 }
 
-// Sets all cell neighboors according to mine_neighbor_count
+// Set all cells according to mine_neighbor_count
 void calculate_neighbors(Field* field) {
 	for (int y = 0; y < field->h; ++y)
 		for (int x = 0; x < field->w; ++x)
@@ -259,7 +259,7 @@ void clear_field(Field* field) {
 			set_cell(field, x, y, false, CLOSED);
 }
 
-// Set all cells to mines if is_mine, non-mines otherwise
+// Set all cells mine-status to is_mine
 void fill_mine_field(Field* field, bool is_mine) {
 	for (int y = 0; y < field->h; ++y)
 		for (int x = 0; x < field->w; ++x)
@@ -274,7 +274,7 @@ void open_field(Field* field) {
 }
 
 // Set all mines to open
-// Unset all non-mine flags
+// Unset all flags
 void open_mines(Field* field) {
 	Cell* cell;
 	for (int y = 0; y < field->h; ++y)
@@ -285,7 +285,7 @@ void open_mines(Field* field) {
 		}
 }
 
-// Initialize field and returns pointer
+// Initialize field and return pointer
 Field* create_field(void) {
 	Field* field = malloc(sizeof(Field));
 	if (field) {
@@ -298,7 +298,7 @@ Field* create_field(void) {
 	return field;
 }
 
-// Frees and reallocates according to new size
+// Frees and reallocates according to size
 // Returns 1 if malloc fails, 0 otherwise
 int resize_field(Field* field) {
 	if (field->cells) free(field->cells);
@@ -315,14 +315,14 @@ int resize_field_to(Field* field, int w, int h) {
 }
 
 // Frees cells and field
-void delete_field(Field* field_p) {
-	if (field_p == NULL) return;
-	if (field_p->cells) free(field_p->cells);
-	free(field_p);
+void delete_field(Field* field) {
+	if (field == NULL) return;
+	if (field->cells) free(field->cells);
+	free(field);
 }
 
 // Clears and randomizes new mine positions
-// Calculates neigbors
+// Calculates neighbors
 void generate_field(Field* field) {
 	fill_mine_field(field, false);
 
@@ -333,9 +333,9 @@ void generate_field(Field* field) {
 }
 
 // Clears and randomizes new mine positions
-// Calculates neigbors
-// If possible x, y will be non-mine
-// If possible cells neighboring x, y will all be non-mine
+// Calculates neighbors
+// If possible cell at pos will be non-mine
+// If possible cells neighboring pos will all be non-mine
 void generate_field_with_zero(Field* field, int x, int y) {
 	// Fills entire board without randomizing if no non-mines exists 
 	if (field->mine_count >= field->w * field->h) {
@@ -370,7 +370,7 @@ void generate_field_with_zero(Field* field, int x, int y) {
 
 // Prints field
 // Does not overwrite with blank spaces
-// Returns cursor to original position
+// Returns cursor to saved position
 void print_field(Field* field) {
 	int foreground_color = -1;
 	for (int y = 0; y < field->h; ++y) {
@@ -422,7 +422,8 @@ void print_field(Field* field) {
 	load_cursor();
 }
 
-// Prints C string at pos without overwriting anything else
+// Prints C-string at pos
+// Does not overwrite anything else
 // Returns cursor to saved position
 void print_at(int x, int y, const char* cstr, ...) {
 	if (y > 0) down_n_lines(y);
@@ -438,15 +439,10 @@ void print_at(int x, int y, const char* cstr, ...) {
 }
 
 // Prints cursor around position
-// Does not overwrite with blank spaces
+// Does not overwrite anything else
 // Returns cursor to original position
 void print_cursor(int x, int y) {
 	print_at(x * 2, y, "[ ]");
-	// if (y > 0) down_n_lines(y);
-	// if (x > 0) right_n_chars(x * 2);
-	// printf("[ ]");
-	// if (y > 0) up_n_lines(y);
-	// else cursor_to_start();
 }
 
 // Overwrites cursor with spaces
@@ -456,15 +452,9 @@ void unprint_cursor(int x, int y) {
 	print_at(x * 2, y, "   ");
 }
 
-// Reads argc arguments from argv and assins to field accordingly
+// Reads argc arguments from argv and assigns to field accordingly
+// Accepted arguments are hardcoded
 // Returns 0 if successful, 1 otherwise
-// Recognized argsuments:
-//     w=<n>       - Sets field width to n
-//     h=<n>       - Sets field height to n
-//     dim=<n>     - Sets field width and height to n
-//     dim=<n>,<m> - Sets field width to n and height to m
-//     mc=<n>      - Sets field mine count to n
-//     mp=<n>      - Sets field mine count to n percent of cell count
 int get_args(int argc, char** argv, Field* field) {
 	bool use_percent = DEFAULT_USE_MINE_PERCENTAGE;
 
@@ -476,6 +466,7 @@ int get_args(int argc, char** argv, Field* field) {
 	for (int i = 1; i < argc; ++i) {
 		char* arg = argv[i];
 
+		// Check for flags
 		if (strcmp(arg, "--help") == 0) {
 			printf(
 				"  w=<n>          Sets field width to n\n"
@@ -511,30 +502,41 @@ int get_args(int argc, char** argv, Field* field) {
 		}
 
 
-
+		// Find argument
 		char* eq_pos = strchr(arg, '=');
 		if (eq_pos) {
 			*(eq_pos++) = '\0';
 			int val = atoi(eq_pos);
 
+			// Check for arguments
 			if (strcmp(arg, "w") == 0) field->w = val;
 			else if (strcmp(arg, "h") == 0) field->h = val;
-			else if (strcmp(arg, "mc") == 0) { use_percent = false; field->mine_count = val; } else if (strcmp(arg, "mp") == 0) { use_percent = true; field->mine_count = val; } else if (strcmp(arg, "dim") == 0) {
+			else if (strcmp(arg, "mc") == 0) {
+				use_percent = false;
+				field->mine_count = val;
+			} else if (strcmp(arg, "mp") == 0) {
+				use_percent = true;
+				field->mine_count = val;
+			} else if (strcmp(arg, "dim") == 0) {
 				char* seperator_pos = strchr(eq_pos + 1, ',');
 
+				// Separate val1 from val2
 				if (seperator_pos) {
 					*(seperator_pos++) = '\0';
-					int pair1 = atoi(eq_pos), pair2 = atoi(seperator_pos);
+					int val1 = atoi(eq_pos), val2 = atoi(seperator_pos);
 
-					field->w = pair1;
-					field->h = pair2;
+					field->w = val1;
+					field->h = val2;
+
+					// Seperator not found, set both to same
 				} else field->w = field->h = val;
 
+				// Argument does not mach anything
 			} else THROW("Argument %i: '%s' not recognized\n", i, arg);
 		} else THROW("Flag %i: '%s' not recognized\n", i, arg);
 	}
 
-	// Set bounds
+	// Clamp bounds
 	field->w = max(field->w, 1);
 	field->h = max(field->h, 1);
 
@@ -542,7 +544,7 @@ int get_args(int argc, char** argv, Field* field) {
 	field->mine_count = max(field->mine_count, 0);
 	field->mine_count = min(field->mine_count, field->w * field->h);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 // Play a simple game of minesweeper
@@ -550,6 +552,7 @@ int main(int argc, char** argv) {
 	time_t start_time;
 	srand(time(&start_time)); // Set random seed
 
+	// Initialize everything
 	Field* field = create_field();
 	if (field == NULL) THROW("Unable to allocate field\n");
 
@@ -581,6 +584,7 @@ int main(int argc, char** argv) {
 	// Game loop
 	char c = '\0';
 	do {
+		// Swich on all keybinds
 		switch (c) {
 			case KEYBIND_UP:
 				if (cursor_y > 0) cursor_y--;
@@ -635,7 +639,7 @@ int main(int argc, char** argv) {
 		print_at((field->w + 1) * 2, 3, game_state == WIN ? "Game Won!" : "Game Lost!");
 		fflush(stdout);
 
-		// Wait for user to contiue
+		// Wait for user to continue
 		while ((c = getch()) != KEYBOARD_INTERRUPT && c != KEYBOARD_ENTER);
 	}
 
