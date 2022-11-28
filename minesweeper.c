@@ -478,6 +478,7 @@ int get_args(int argc, char** argv, Field* field) {
 				"  mp=<n>         Sets field mine count to n percent of cell count\n"
 				"\n"
 				"  --help         Display this information\n"
+				"  --version      Display the current version information\n"
 				"  --keybinds     List all keybinds\n"
 			);
 

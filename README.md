@@ -10,9 +10,10 @@ Recognized command line arguments:
 * mc=\<n>       - Sets field mine count to n
 * mp=\<n>       - Sets field mine count to n percent of cell count
 * --help        - List all valid commands
+* --version     - Display the current version information
 * --keybinds    - List all keybinds
 
-Rightmost argument (except for --help and --keybinds) takes priority and percentage is calculated last.
+Rightmost argument (except for --help, --version and --keybinds) takes priority and percentage is calculated last.
 
 Default arguments:
 * field width           = 20
