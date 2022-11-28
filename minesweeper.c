@@ -483,6 +483,14 @@ int get_args(int argc, char** argv, Field* field) {
 
 			exit(EXIT_SUCCESS);
 
+		} else if (strcmp(arg, "--version") == 0) {
+			printf(
+				"Minesweeper 1.0.2\n"
+				"Find the latest update at: https://github.com/TheArchSeal/Minesweeper\n"
+			);
+
+			exit(EXIT_SUCCESS);
+
 		} else if (strcmp(arg, "--keybinds") == 0) {
 			printf(
 				"  w           Move cursor up\n"
