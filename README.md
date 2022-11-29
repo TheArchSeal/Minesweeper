@@ -1,8 +1,10 @@
 # Minesweeper
 A simple game of minesweeper in powershell
 
+Version 1.0.2
+
 ---
-Recognized command line arguments:
+## Recognized command line arguments:
 * w=\<n>        - Sets field width to n
 * h=\<n>        - Sets field height to n
 * dim=\<n>      - Sets field width and height to n
@@ -15,12 +17,12 @@ Recognized command line arguments:
 
 Rightmost argument (except for --help, --version and --keybinds) takes priority and percentage is calculated last.
 
-Default arguments:
+## Default arguments:
 * field width           = 20
 * field height          = 15
 * field mine percentage = 15
 
-Ingame Keybinds:
+## Ingame Keybinds:
 * w :      Move cursor up
 * s :      Move cursor down
 * a :      Move cursor left
@@ -31,7 +33,7 @@ Ingame Keybinds:
 * Ctrl+c : Exit game
 * \<any> : Update timer and redraw
 
-Neat features:
+## Neat features:
 * The terminal will clear away the field after playing
 * You can't open a flagged cell
 * The first cell will always be 0 if possible
